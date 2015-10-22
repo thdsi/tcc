@@ -11,8 +11,6 @@ String HTTP_req;
 DS1307 rtc(A4, A5);
 
 String horarioAgora = "00:00";
-byte horaAgora = 0;
-byte minutoAgora = 0;
 
 String horarioAmanhecer = "00:00";
 byte horaAmanhecer = 0;
@@ -39,8 +37,10 @@ void setup()
     Ethernet.begin(mac, ip);
     server.begin();
     Serial.begin(9600);
-    //rtc.halt(false);
-    //rtc.setTime(05,04,00);
+    rtc.halt(false);
+    //rtc.setTime(07,01,00);
+     pinMode(53, OUTPUT);
+     digitalWrite(53, LOW);
 }
 
 void loop()
@@ -125,8 +125,7 @@ void loop()
 void ligarDesligarLeds()
 {
     horarioAgora = rtc.getTimeStr();
-//    horaAgora = horarioAgora.substring(0,2).toInt();
-//    minutoAgora = horarioAgora.substring(3,5).toInt();
+    horarioAgora = horarioAgora.substring(0,5);
 
     horaAmanhecer = horarioAmanhecer.substring(0,2).toInt();
     minutoAmanhecer = horarioAmanhecer.substring(3,5).toInt();
@@ -159,13 +158,21 @@ void ligarDesligarLeds()
     else
         horarioAnoitecer = horarioAnoitecer + ":" + String(minutoAnoitecer);
 
-    if (horarioAgora == horarioAmanhecer)
-        digitalWrite(13, HIGH);
-    if (horarioAgora == horarioAnoitecer)
-        digitalWrite(13, LOW);
-    
-    Serial.println(horarioAmanhecer);
-    Serial.println(horarioAnoitecer);
+        Serial.println(horarioAgora);
+        Serial.println(horarioAmanhecer);
+        Serial.println(horarioAnoitecer);
+
+    if (horarioAgora.equals(horarioAmanhecer))
+    {
+        digitalWrite(53, HIGH);
+    }
+        
+    if (horarioAgora.equals(horarioAnoitecer))
+    {
+        digitalWrite(53, LOW);
+    }
+
+
 }
 
 void ligarDesligarBomba()
