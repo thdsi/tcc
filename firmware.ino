@@ -10,10 +10,29 @@ String HTTP_req;
 
 DS1307 rtc(A4, A5);
 
+String horarioAgora = "00:00";
+byte horaAgora = 0;
+byte minutoAgora = 0;
+
 String horarioAmanhecer = "00:00";
+byte horaAmanhecer = 0;
+byte minutoAmanhecer = 0;
+
+String horarioAnoitecer = "00:00";
+byte horaAnoitecer = 0;
+byte minutoAnoitecer = 0;
+
 String duracaoDia = "00:00";
+byte horaDuracaoDia = 0;
+byte minutoDuracaoDia = 0;
+
 String duracaoIrrigacao = "00:00";
+byte horaDuracaoIrrigacao = 0;
+byte minutoDuracaoIrrigacao = 0;
+
 String intervaloIrrigacao = "00:00";
+byte horaIntervaloIrrigacao = 0;
+byte minutoIntervaloIrrigacao = 0;
 
 void setup()
 {
@@ -98,8 +117,60 @@ void loop()
         delay(1);
         client.stop();
     }
-    Serial.println(rtc.getTimeStr());
+    
+    ligarDesligarLeds();
     delay(100);
+}
+
+void ligarDesligarLeds()
+{
+    horarioAgora = rtc.getTimeStr();
+//    horaAgora = horarioAgora.substring(0,2).toInt();
+//    minutoAgora = horarioAgora.substring(3,5).toInt();
+
+    horaAmanhecer = horarioAmanhecer.substring(0,2).toInt();
+    minutoAmanhecer = horarioAmanhecer.substring(3,5).toInt();
+
+    horaDuracaoDia = duracaoDia.substring(0,2).toInt();
+    minutoDuracaoDia = duracaoDia.substring(3,5).toInt();
+
+    horaAnoitecer = horaAmanhecer + horaDuracaoDia;
+    minutoAnoitecer = minutoAmanhecer + minutoDuracaoDia;
+
+    if (minutoAnoitecer == 60)
+    {
+        minutoAnoitecer = 0;
+        horaAnoitecer = horaAnoitecer + 1;
+    }
+    else if(minutoAnoitecer > 60)
+    {
+        minutoAnoitecer = minutoAnoitecer%60;
+        horaAnoitecer = horaAnoitecer + 1;  
+    }
+
+
+    if (horaAnoitecer < 10) 
+        horarioAnoitecer = "0" + String(horaAnoitecer);
+    else
+        horarioAnoitecer = String(horaAnoitecer);
+
+    if (minutoAnoitecer < 10)
+        horarioAnoitecer = horarioAnoitecer + ":" + "0" + String(minutoAnoitecer);  
+    else
+        horarioAnoitecer = horarioAnoitecer + ":" + String(minutoAnoitecer);
+
+    if (horarioAgora == horarioAmanhecer)
+        digitalWrite(13, HIGH);
+    if (horarioAgora == horarioAnoitecer)
+        digitalWrite(13, LOW);
+    
+    Serial.println(horarioAmanhecer);
+    Serial.println(horarioAnoitecer);
+}
+
+void ligarDesligarBomba()
+{
+      
 }
 
 void getHorarioAmanhecer(EthernetClient cl)
