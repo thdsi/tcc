@@ -319,7 +319,7 @@ void sendBrowserApplication()
     client.println("    <div class=\"container\">");
     client.println("        <div class=\"panel panel-default\">                                                               ");
     client.println("            <div class=\"panel-heading text-center\">                                                     ");
-    client.println("                <h3>SISTEMA EMBARCADO DE CONTROLE</h3><h3 id=\"time\"></h3>                               ");
+    client.println("                <b><h3 id=\"time\"></h3></b><h4>PAINEL DE CONTROLE DE CULTIVO</h4>                        ");
     client.println("            </div>                                                                                        ");
     client.println("            <div class=\"panel-body\">                                                                    ");
     client.println("                <form>                                                                                    ");
