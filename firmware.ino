@@ -13,8 +13,7 @@ DS1307 rtc(A4, A5);
 String horarioAgora = "00:00";
 
 String horarioAmanhecer = "00:00";
-byte horaAmanhecer = 0;
-byte minutoAmanhecer = 0;
+
 
 String horarioAnoitecer = "00:00";
 byte horaAnoitecer = 0;
@@ -28,6 +27,14 @@ String duracaoIrrigacao = "00:00";
 byte horaDuracaoIrrigacao = 0;
 byte minutoDuracaoIrrigacao = 0;
 
+String horarioLigarIrrigacao = "00:00";
+byte horaLigarIrrigacao = 0;
+byte minutoLigarIrrigacao = 0;
+
+String horarioDesligarIrrigacao = "00:00";
+byte horaDesligarIrrigacao = 0;
+byte minutoDesligarIrrigacao = 0;
+
 String intervaloIrrigacao = "00:00";
 byte horaIntervaloIrrigacao = 0;
 byte minutoIntervaloIrrigacao = 0;
@@ -36,11 +43,13 @@ void setup()
 {
     Ethernet.begin(mac, ip);
     server.begin();
-    Serial.begin(9600);
+    Serial.begin(115200);
     rtc.halt(false);
     //rtc.setTime(07,01,00);
      pinMode(53, OUTPUT);
      digitalWrite(53, LOW);
+     pinMode(51, OUTPUT);
+     digitalWrite(51, LOW);
 }
 
 void loop()
@@ -112,27 +121,24 @@ void loop()
                     currentLineIsBlank = false;
                 }
             }
-        }
-        
+        }       
         delay(1);
         client.stop();
     }
-    
-    ligarDesligarLeds();
+    checarLeds();
     delay(100);
 }
 
-void ligarDesligarLeds()
+void checarLeds()
 {
     horarioAgora = rtc.getTimeStr();
     horarioAgora = horarioAgora.substring(0,5);
-
-    horaAmanhecer = horarioAmanhecer.substring(0,2).toInt();
-    minutoAmanhecer = horarioAmanhecer.substring(3,5).toInt();
-
+    
+    byte horaAmanhecer = horarioAmanhecer.substring(0,2).toInt();
+    byte minutoAmanhecer = horarioAmanhecer.substring(3,5).toInt();
+    
     horaDuracaoDia = duracaoDia.substring(0,2).toInt();
     minutoDuracaoDia = duracaoDia.substring(3,5).toInt();
-
     horaAnoitecer = horaAmanhecer + horaDuracaoDia;
     minutoAnoitecer = minutoAmanhecer + minutoDuracaoDia;
 
@@ -147,10 +153,18 @@ void ligarDesligarLeds()
         horaAnoitecer = horaAnoitecer + 1;  
     }
 
-
     if (horaAnoitecer < 10) 
         horarioAnoitecer = "0" + String(horaAnoitecer);
-    else
+    else if (horaAnoitecer == 24)
+        horarioAnoitecer = "00";
+    else if (horaAnoitecer > 24)
+    {
+        if (horaAnoitecer%24 < 10)
+        horarioAnoitecer = "0" + String(horaAnoitecer%24);
+        else
+        horarioAnoitecer = String(horaAnoitecer%24);
+    }
+    else 
         horarioAnoitecer = String(horaAnoitecer);
 
     if (minutoAnoitecer < 10)
@@ -163,21 +177,15 @@ void ligarDesligarLeds()
         Serial.println(horarioAnoitecer);
 
     if (horarioAgora.equals(horarioAmanhecer))
-    {
         digitalWrite(53, HIGH);
-    }
         
-    if (horarioAgora.equals(horarioAnoitecer))
-    {
-        digitalWrite(53, LOW);
-    }
-
-
+    else if (horarioAgora.equals(horarioAnoitecer))
+        digitalWrite(53, LOW);  
 }
 
-void ligarDesligarBomba()
+void chegarIrrigacao()
 {
-      
+    
 }
 
 void getHorarioAmanhecer(EthernetClient cl)
@@ -319,7 +327,7 @@ void sendBrowserApplication()
     client.println("    <div class=\"container\">");
     client.println("        <div class=\"panel panel-default\">                                                               ");
     client.println("            <div class=\"panel-heading text-center\">                                                     ");
-    client.println("                <b><h3 id=\"time\"></h3></b><h4>PAINEL DE CONTROLE DE CULTIVO</h4>                        ");
+    client.println("                <h3 id=\"time\"></h3><h4>PAINEL DE CONTROLE DE CULTIVO</h4>                               ");
     client.println("            </div>                                                                                        ");
     client.println("            <div class=\"panel-body\">                                                                    ");
     client.println("                <form>                                                                                    ");
